@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz de Arquitetura de Software</title>
+    <style>
+        /* --- CSS styles start here --- */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #eef2f7;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to top for longer content */
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 700px;
+            box-sizing: border-box;
+            margin-top: 20px; /* Space from top */
+            margin-bottom: 20px;
+        }
+
+        h1, h2, h3 {
+            color: #0056b3;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .screen {
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Quiz Selection Screen */
+        #quiz-selection {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        #quiz-selection select,
+        #quiz-selection button {
+            padding: 12px 15px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 1em;
+            cursor: pointer;
+            background-color: #f0f0f0;
+            transition: all 0.2s ease-in-out;
+        }
+
+        #quiz-selection select:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+        }
+
+        #quiz-selection button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            font-weight: bold;
+        }
+
+        #quiz-selection button:hover {
+            background-color: #0056b3;
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+        }
+
+        .error-message {
+            color: #dc3545;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* Quiz Screen */
+        #quiz-screen #question-counter {
+            text-align: center;
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        #quiz-screen #question-text {
+            font-size: 1.15em;
+            margin-bottom: 20px;
+            background-color: #e9f5ff;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 5px solid #007bff;
+        }
+
+        #options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .option-button {
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            padding: 12px 15px;
+            border-radius: 6px;
+            font-size: 1em;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .option-button:hover {
+            background-color: #e0e0e0;
+        }
+
+        .option-button.selected {
+            border-color: #007bff;
+            background-color: #e6f3ff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+        }
+
+        .option-button.correct {
+            background-color: #d4edda;
+            border-color: #28a745;
+            font-weight: bold;
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.25);
+        }
+
+        .option-button.incorrect {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+            font-weight: bold;
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25);
+        }
+
+        #submit-answer, #next-question, #restart-quiz {
+            padding: 12px 20px;
+            border-radius: 6px;
+            border: none;
+            font-size: 1em;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        #submit-answer {
+            background-color: #28a745;
+            color: white;
+        }
+        #submit-answer:hover {
+            background-color: #218838;
+        }
+
+        #next-question {
+            background-color: #6c757d;
+            color: white;
+        }
+        #next-question:hover {
+            background-color: #5a6268;
+        }
+
+        #feedback-message {
+            text-align: center;
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .feedback-incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .citation {
+            font-size: 0.85em;
+            color: #555;
+            text-align: right;
+            margin-top: 15px;
+            font-style: italic;
+        }
+
+        /* Results Screen */
+        #results-screen {
+            text-align: center;
+        }
+        #results-screen p {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+        #restart-quiz {
+            background-color: #007bff;
+            color: white;
+        }
+        #restart-quiz:hover {
+            background-color: #0056b3;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+            h2 {
+                font-size: 1.4em;
+            }
+            .option-button,
+            #quiz-selection select,
+            #quiz-selection button,
+            #submit-answer, #next-question, #restart-quiz {
+                font-size: 0.95em;
+                padding: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+                margin: 5px;
+            }
+            h1 {
+                font-size: 1.6em;
+            }
+            h2 {
+                font-size: 1.2em;
+            }
+            .option-button {
+                padding: 8px;
+            }
+            #quiz-screen #question-text {
+                font-size: 1em;
+                padding: 10px;
+            }
+        }
+        /* --- CSS styles end here --- */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Quiz de Arquitetura de Software</h1>
+
+        <div id="quiz-selection" class="screen">
+            <h2>Selecione um Tema e Nível</h2>
+            <select id="theme-select">
+                <option value="">Escolha o Tema</option>
+                <option value="filasMensagens">Filas de Mensagens em Sistemas Distribuídos</option>
+                <option value="apiGateway">API Gateway em Arquiteturas de Sistemas</option>
+                <option value="modelagemAnalise">Modelagem e Análises Arquiteturais</option>
+                <option value="arquiteturasModernas">Arquiteturas de Software Modernas</option>
+            </select>
+            <select id="level-select">
+                <option value="">Escolha o Nível</option>
+                <option value="medio">Médio</option>
+                <option value="dificil">Difícil</option>
+            </select>
+            <button id="start-quiz">Iniciar Quiz</button>
+            <p id="selection-error" class="error-message"></p>
+        </div>
+
+        <div id="quiz-screen" class="screen hidden">
+            <h2 id="current-theme"></h2>
+            <div id="question-counter">Questão <span id="current-question-number"></span> de <span id="total-questions"></span></div>
+            <p id="question-text"></p>
+            <div id="options-container">
+                </div>
+            <button id="submit-answer">Verificar Resposta</button>
+            <button id="next-question" class="hidden">Próxima Questão</button>
+            <p id="feedback-message" class="hidden"></p>
+            <div class="citation hidden" id="citation-display">Fonte: <span id="citation-text"></span></div>
+        </div>
+
+        <div id="results-screen" class="screen hidden">
+            <h2>Resultados do Quiz</h2>
+            <p>Você acertou <span id="score"></span> de <span id="total-quiz-questions"></span> questões.</p>
+            <button id="restart-quiz">Reiniciar Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        /* --- JavaScript questions data start here --- */
+        const questions = {
+            "filasMensagens": {
+                "medio": [
+                    {
+                        "question": "O que define um sistema distribuído?",
+                        "options": [
+                            "A) Uma coleção de computadores autônomos que opera localmente.",
+                            "B) Um sistema único e integrado executado em um único servidor.",
+                            "C) Uma coleção de computadores autônomos que aparece aos usuários como um sistema único e integrado.",
+                            "D) Um conjunto de processos que se comunicam através de memória compartilhada."
+                        ],
+                        "correctAnswer": "C",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Quais das seguintes opções é uma característica de sistemas distribuídos?",
+                        "options": [
+                            "A) Baixa concorrência.",
+                            "B) Não utilização de redes para comunicação.",
+                            "C) Escalabilidade.",
+                            "D) Alta dependência de hardware específico."
+                        ],
+                        "correctAnswer": "C",
+                        "citation": ""
+                    },
+                    {
+                        "question": "O que significa escalabilidade em um sistema distribuído?",
+                        "options": [
+                            "A) A capacidade de diminuir o desempenho com o aumento da carga.",
+                            "B) A capacidade de crescer sem perder desempenho.",
+                            "C) A restrição a um número fixo de usuários.",
+                            "D) A necessidade de sempre adicionar mais CPUs a um único servidor."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Qual o papel do produtor em um sistema de mensagens?",
+                        "options": [
+                            "A) Escutar e processar mensagens.",
+                            "B) Gera eventos/mensagens.",
+                            "C) Apenas esperar por respostas.",
+                            "D) Gerenciar a fila de mensagens."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Qual a definição de filas de mensagens?",
+                        "options": [
+                            "A) Mecanismos usados para implementar comunicação direta e síncrona entre processos.",
+                            "B) Mecanismos usados para implementar comunicação indireta entre processos, suportando tolerância a falhas e escalabilidade.",
+                            "C) Um banco de dados para armazenamento temporário de dados.",
+                            "D) Um tipo de cache distribuído sem persistência."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Para que servem as 'dead letter queues' (DLQ)?",
+                        "options": [
+                            "A) Apenas para armazenar mensagens que foram processadas com sucesso.",
+                            "B) Para armazenar mensagens que não puderam ser processadas com sucesso após diversas tentativas.",
+                            "C) Para aumentar a prioridade de mensagens importantes.",
+                            "D) Para manter mensagens em memória RAM apenas."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Qual dos seguintes é um conceito-chave do RabbitMQ?",
+                        "options": [
+                            "A) Servidor HTTP.",
+                            "B) Cliente SQL.",
+                            "C) Exchange.",
+                            "D) Container Docker."
+                        ],
+                        "correctAnswer": "C",
+                        "citation": ""
+                    },
+                    {
+                        "question": "O que significa FIFO em filas de mensagens?",
+                        "options": [
+                            "A) Fail-In, Fail-Out.",
+                            "B) First-In-First-Out.",
+                            "C) Fast-In, Fast-Out.",
+                            "D) Flexible-In, Flexible-Out."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Para que o RabbitMQ é usado na comunicação entre microserviços?",
+                        "options": [
+                            "A) Para comunicação síncrona exclusiva.",
+                            "B) Para comunicação assíncrona e desacoplada.",
+                            "C) Apenas para armazenamento de logs.",
+                            "D) Para substituir totalmente um banco de dados."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "O que o consumidor faz em relação às mensagens em um sistema de filas?",
+                        "options": [
+                            "A) Gera novas mensagens.",
+                            "B) Armazena mensagens na fila.",
+                            "C) Escuta e processa mensagens.",
+                            "D) Define regras de roteamento."
+                        ],
+                        "correctAnswer": "C",
+                        "citation": ""
+                    },
+                    { "question": "Qual o principal desafio relacionado à consistência de dados em sistemas distribuídos?", "options": ["A) Garantir que os dados permaneçam diferentes em todos os nós.", "B) Manter os dados e estados do sistema corretamente, mesmo em ambientes distribuídos.", "C) Eliminar completamente a replicação de dados.", "D) Aumentar a latência na propagação de dados."], "correctAnswer": "B", "citation": "" },
+                    { "question": "Um exemplo prático de produtor em uma compra online é:", "options": ["A) Serviço de pagamentos.", "B) Frontend da loja.", "C) Sistema de contabilidade.", "D) Serviço de estoque."], "correctAnswer": "B", "citation": "" },
+                    { "question": "Qual a principal vantagem das filas de mensagens em termos de desacoplamento?", "options": ["A) Componentes precisam estar ativos simultaneamente.", "B) Componentes não precisam estar ativos simultaneamente.", "C) Aumenta a dependência entre os componentes.", "D) Permite apenas comunicação síncrona."], "correctAnswer": "B", "citation": "" },
+                    { "question": "Qual característica técnica das filas de mensagens permite que algumas mensagens 'furem a fila'?", "options": ["A) FIFO.", "B) Persistência.", "C) Filas prioritárias.", "D) Dead Letter Queues."], "correctAnswer": "C", "citation": "" },
+                    { "question": "Para tarefas críticas como pagamentos e cadastros, qual tipo de fila é recomendado?", "options": ["A) Filas transitórias.", "B) Filas com TTL baixo.", "C) Filas persistentes.", "D) Filas de auto-delete."], "correctAnswer": "C", "citation": "" },
+                    { "question": "O que a 'Event-Driven Architecture' com filas de mensagens busca melhorar?", "options": ["A) Apenas a performance síncrona.", "B) A reatividade e o desacoplamento entre produtor e consumidor.", "C) Aumentar o acoplamento entre os serviços.", "D) Eliminar a necessidade de escalabilidade."], "correctAnswer": "B", "citation": "" },
+                    { "question": "No RabbitMQ, o que faz um 'Exchange'?", "options": ["A) Armazena mensagens até serem consumidas.", "B) Envia mensagens diretamente para um consumidor.", "C) Encaminha mensagens para as filas com base em regras.", "D) Recebe mensagens da fila."], "correctAnswer": "C", "citation": "" },
+                    { "question": "Qual tipo de 'Exchange' no RabbitMQ envia mensagens para todas as filas ligadas?", "options": ["A) Direct.", "B) Topic.", "C) Fanout.", "D) Headers."], "correctAnswer": "C", "citation": "" },
+                    { "question": "No RabbitMQ, uma 'Queue' do tipo 'Durable' significa que ela:", "options": ["A) É apagada ao desconectar.", "B) É acessível apenas por uma conexão.", "C) Sobrevive ao reinício do broker.", "D) Armazena mensagens apenas em memória."], "correctAnswer": "C", "citation": "" },
+                    { "question": "Qual boa prática é recomendada no uso de RabbitMQ para garantir a entrega das mensagens?", "options": ["A) Evitar filas duráveis.", "B) Usar confirm channels.", "C) Não monitorar as filas.", "D) Acoplar produtores e consumidores."], "correctAnswer": "B", "citation": "" },
+                    { "question": "Um dos desafios em sistemas distribuídos é:", "options": ["A) Facilidade de sincronização de tempo.", "B) Eliminar a necessidade de segurança.", "C) Detecção de falhas.", "D) Baixa heterogeneidade."], "correctAnswer": "C", "citation": "" },
+                    { "question": "Como a concorrência se manifesta em sistemas distribuídos?", "options": ["A) Um único componente operando sequencialmente.", "B) Vários componentes operando simultaneamente.", "C) Componentes que nunca interagem entre si.", "D) Apenas um produtor e um consumidor por sistema."], "correctAnswer": "B", "citation": "" },
+                    { "question": "Qual das seguintes características permite que um sistema distribuído funcione em diferentes hardwares e sistemas operacionais?", "options": ["A) Transparência.", "B) Tolerância a falhas.", "C) Heterogeneidade.", "D) Concorrência."], "correctAnswer": "C", "citation": "" },
+                    { "question": "O que significa 'TTL (Time To Live)' para mensagens em filas?", "options": ["A) A mensagem nunca expira.", "B) As mensagens expiram se não forem consumidas a tempo.", "C) É o tempo máximo que o produtor pode enviar mensagens.", "D) Define a prioridade de uma mensagem."], "correctAnswer": "B", "citation": "" },
+                    { "question": "Em sistemas baseados em eventos, cada mensagem geralmente representa:", "options": ["A) Um comando para parar o sistema.", "B) Um evento que pode acionar ações em serviços desacoplados.", "C) Um dado a ser descartado.", "D) Uma confirmação de erro."], "correctAnswer": "B", "citation": "" }
+                ],
+                "dificil": [
+                    {
+                        "question": "Em um sistema produtor-consumidor com filas de mensagens, qual a principal vantagem do desacoplamento temporal?",
+                        "options": [
+                            "A) Garante que produtor e consumidor estejam ativos simultaneamente para processamento imediato.",
+                            "B) Permite que o consumidor processe mensagens mesmo que o produtor esteja offline no momento do consumo.",
+                            "C) Elimina a necessidade de armazenamento intermediário para as mensagens.",
+                            "D) Impede que múltiplas instâncias do consumidor trabalhem em paralelo."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Como a utilização de 'Dead Letter Queues (DLQ)' se relaciona com a resiliência em sistemas distribuídos que utilizam filas de mensagens?",
+                        "options": [
+                            "A) A DLQ armazena apenas mensagens expiradas, sem relação com falhas de processamento.",
+                            "B) Ela permite que o sistema continue operando, isolando mensagens que falharam repetidamente no processamento, evitando bloqueios.",
+                            "C) A DLQ é uma fila prioritária que garante o processamento imediato de todas as mensagens.",
+                            "D) Sua função principal é reprocessar automaticamente todas as mensagens com erro sem intervenção manual."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Qual a distinção crucial entre filas persistentes e transitórias em sistemas de mensagens?",
+                        "options": [
+                            "A) Filas persistentes armazenam mensagens apenas em RAM, enquanto transitórias usam disco.",
+                            "B) Filas persistentes garantem que mensagens não se percam após reinício do broker (usando disco), enquanto transitórias podem ser perdidas (usando RAM).",
+                            "C) Filas persistentes são mais rápidas, mas menos seguras.",
+                            "D) Filas transitórias suportam dead letter queues, enquanto as persistentes não."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "No exemplo de processamento assíncrono de cadastro de usuário com RabbitMQ, qual o papel da 'Exchange'?",
+                        "options": [
+                            "A) Salvar os dados diretamente no banco de dados.",
+                            "B) Iniciar a requisição de cadastro via HTTP.",
+                            "C) Roteia mensagens da API para a fila correta, sem o produtor enviar diretamente à fila.",
+                            "D) Consumir mensagens e executar a lógica de negócio."
+                        ],
+                        "correctAnswer": "C",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Por que a 'Event-Driven Architecture' com filas de mensagens é considerada superior a um modelo síncrono tradicional em termos de escalabilidade e reatividade?",
+                        "options": [
+                            "A) Porque ela exige que todos os componentes estejam online e síncronos.",
+                            "B) Porque permite comunicação assíncrona, desacoplando produtor e consumidor, e facilita a escalabilidade horizontal.",
+                            "C) Porque elimina a necessidade de gerenciamento de estado.",
+                            "D) Porque garante que todas as operações sejam instantâneas, sem latência."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "O que é um 'Quorum Queue' no RabbitMQ e qual sua principal vantagem?",
+                        "options": [
+                            "A) Uma fila que armazena mensagens em disco para uso intenso, sem replicação.",
+                            "B) Uma fila que garante alta disponibilidade e consistência por meio de consenso entre nós.",
+                            "C) Uma fila que apaga automaticamente as mensagens ao desconectar.",
+                            "D) Uma fila que é acessível apenas por uma conexão exclusiva."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Como a boa prática de 'usar confirm channels' no RabbitMQ contribui para a confiabilidade?",
+                        "options": [
+                            "A) Garante que as mensagens sejam armazenadas apenas em memória.",
+                            "B) Garante que o produtor receba uma confirmação de que a mensagem foi recebida e persistida pelo broker.",
+                            "C) Assegura que o consumidor processe a mensagem instantaneamente.",
+                            "D) Permite que o RabbitMQ apague mensagens automaticamente sem confirmação."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Em sistemas distribuídos, como a 'Transparência' e a 'Comunicação' se complementam?",
+                        "options": [
+                            "A) Transparência esconde a comunicação, tornando-a irrelevante.",
+                            "B) Para o sistema parecer único (transparência), a comunicação subjacente deve ser eficiente e confiável, permitindo a interação entre nós.",
+                            "C) A comunicação é um desafio que impede a transparência total.",
+                            "D) Ambas são desafios que não se complementam, apenas coexistem."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Qual a implicação de usar 'channel.prefetch(1)' no consumidor do RabbitMQ?",
+                        "options": [
+                            "A) O consumidor só recebe uma mensagem por vez, garantindo processamento sequencial e evitando sobrecarga.",
+                            "B) O consumidor recebe todas as mensagens da fila de uma vez.",
+                            "C) O produtor só pode enviar uma mensagem por vez.",
+                            "D) A mensagem nunca é confirmada (ack) pelo consumidor."
+                        ],
+                        "correctAnswer": "A",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Em qual cenário a utilização de 'filas prioritárias' em um sistema de mensagens seria mais vantajosa?",
+                        "options": [
+                            "A) Em um sistema onde a ordem de chegada das mensagens é estritamente prioritária.",
+                            "B) Para garantir que mensagens de baixa importância sejam processadas primeiro.",
+                            "C) Quando certas mensagens críticas precisam 'furar a fila' e serem processadas antes de outras, independentemente da ordem de chegada.",
+                            "D) Apenas para reduzir o número total de mensagens na fila."
+                        ],
+                        "correctAnswer": "C",
+                        "citation": ""
+                    },
+                    { "question": "Discuta a relevância de 'monitoramento e observabilidade' para a operação de sistemas que utilizam filas de mensagens em produção.", "options": ["A) São irrelevantes, pois as filas lidam com falhas automaticamente.", "B) Permitem identificar, diagnosticar e responder rapidamente a problemas como filas cheias, mensagens não processadas ou gargalos de consumidores.", "C) Servem apenas para contar o número total de mensagens processadas.", "D) São ferramentas exclusivas para depuração em ambiente de desenvolvimento."], "correctAnswer": "B", "citation": "" },
+                    { "question": "Qual a relação entre o conceito de 'balanceamento de carga' e o uso de filas de mensagens com múltiplos consumidores?", "options": ["A) Múltiplos consumidores não podem dividir o trabalho em filas.", "B) As filas garantem que um único consumidor processe todas as mensagens, sem balanceamento.", "C) Filas de mensagens permitem que múltiplos consumidores concorrentes dividam e processem o trabalho de forma distribuída, balanceando a carga.", "D) O balanceamento de carga só é possível com comunicação síncrona."], "correctAnswer": "C", "citation": "" },
+                    { "question": "Por que o 'acoplamento entre produtor e consumidor' deve ser evitado em arquiteturas com filas de mensagens?", "options": ["A) Para garantir que o produtor espere pela resposta do consumidor.", "B) Para que os componentes não precisem estar ativos simultaneamente e possam evoluir independentemente.", "C) Para aumentar a complexidade da comunicação.", "D) Para forçar a comunicação síncrona entre eles."], "correctAnswer": "B", "citation": "" },
+                    { "question": "Qual o papel das 'APIs RESTful ou GraphQL' e 'barramentos de eventos (Kafka, RabbitMQ)' na solução do desafio de 'Interoperabilidade e Integração de Sistemas'?", "options": ["A) Aumentam a fragmentação entre sistemas.", "B) Garantem comunicação eficiente entre sistemas com tecnologias diferentes, permitindo a troca de dados e eventos.", "C) Limitam a comunicação a sistemas homogêneos.", "D) São apenas ferramentas de monitoramento."], "correctAnswer": "B", "citation": "" },
+                    { "question": "Em termos de custos operacionais e eficiência de recursos, como 'Autoscaling' e 'FinOps' são soluções para arquiteturas modernas?", "options": ["A) Aumentam os custos ao superprovisionar recursos.", "B) Permitem equilibrar custos e desempenho, escalando recursos conforme a demanda e otimizando gastos na nuvem.", "C) São ferramentas apenas para monitorar o uso de CPU.", "D) Exigem gerenciamento manual constante de servidores."], "correctAnswer": "B", "citation": "" }
+                ]
+            },
+            "apiGateway": {
+                "medio": [
+                    {
+                        "question": "Qual das seguintes é uma função principal de um API Gateway?",
+                        "options": [
+                            "A) Armazenar todos os dados do banco de dados.",
+                            "B) Roteamento de requisições.",
+                            "C) Executar a lógica de negócio completa dos microserviços.",
+                            "D) Eliminar a necessidade de autenticação."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Em uma arquitetura de Microserviços + API Gateway, como o cliente tipicamente se comunica com os serviços internos?",
+                        "options": [
+                            "A) Diretamente com cada microserviço.",
+                            "B) Somente através de um Service Mesh.",
+                            "C) Apenas com o banco de dados.",
+                            "D) Conectando-se somente ao API Gateway."
+                        ],
+                        "correctAnswer": "D",
+                        "citation": ""
+                    },
+                    {
+                        "question": "O que é 'Service Discovery' no contexto de um API Gateway?",
+                        "options": [
+                            "A) Um método para descobrir novos usuários na aplicação.",
+                            "B) Um mecanismo que permite ao API Gateway localizar dinamicamente os serviços backend.",
+                            "C) Uma forma de descobrir erros no código do frontend.",
+                            "D) O processo de encontrar APIs públicas na internet."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Qual a vantagem de 'API Composition' em relação ao número de chamadas cliente → backend?",
+                        "options": [
+                            "A) Aumenta o número de chamadas.",
+                            "B) Reduz o número de chamadas.",
+                            "C) Não tem impacto no número de chamadas.",
+                            "D) Torna todas as chamadas síncronas."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "O que são 'Cross-cutting Concerns'?",
+                        "options": [
+                            "A) Funcionalidades exclusivas de um único serviço.",
+                            "B) Preocupações de segurança que afetam apenas o banco de dados.",
+                            "C) Funcionalidades comuns a todos os serviços, como Logging e Autenticação.",
+                            "D) Erros que ocorrem em diferentes partes do sistema simultaneamente."
+                        ],
+                        "correctAnswer": "C",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Em que tipo de arquitetura NÃO é recomendado usar um API Gateway?",
+                        "options": [
+                            "A) Integração de microserviços.",
+                            "B) Sistemas com muitos serviços complexos.",
+                            "C) Arquiteturas simples, com poucos serviços.",
+                            "D) Cenários que exigem controle de segurança e QoS."
+                        ],
+                        "correctAnswer": "C",
+                        "citation": ""
+                    },
+                    {
+                        "question": "O que significa a sigla 'BFF' no contexto de arquiteturas de sistemas?",
+                        "options": [
+                            "A) Big Fast Function.",
+                            "B) Backend for Frontend.",
+                            "C) Basic Frontal Feature.",
+                            "D) Business Feature Framework."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Qual o principal objetivo de um 'Backend for Frontend'?",
+                        "options": [
+                            "A) Criar um backend único para todos os clientes.",
+                            "B) Fornecer uma interface otimizada para as necessidades específicas de cada tipo de cliente.",
+                            "C) Aumentar a complexidade no cliente.",
+                            "D) Exigir que o frontend evolua junto com o backend principal."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "O que é um 'Circuit Breaker'?",
+                        "options": [
+                            "A) Um dispositivo elétrico que protege contra sobrecarga de energia.",
+                            "B) Um padrão de resiliência para evitar falhas em cascata em sistemas distribuídos.",
+                            "C) Uma ferramenta para monitorar o tráfego de rede.",
+                            "D) Um tipo de firewall para bloquear ataques."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "No estado 'Aberto' do 'Circuit Breaker', o que acontece com as novas chamadas ao serviço?",
+                        "options": [
+                            "A) Chamadas fluem normalmente.",
+                            "B) Permite algumas chamadas de teste.",
+                            "C) Interrompe chamadas ao serviço para evitar sobrecarga.",
+                            "D) Redireciona todas as chamadas para um serviço de backup."
+                        ],
+                        "correctAnswer": "C",
+                        "citation": ""
+                    },
+                    { "question": "Qual a vantagem de centralizar a segurança e autenticação em um API Gateway?", "options": ["A) Aumenta a complexidade de gerenciar credenciais.", "B) Facilita a gestão de acesso e a aplicação de políticas de segurança em um único ponto.", "C) Elimina a necessidade de qualquer tipo de segurança no backend.", "D) Torna o sistema menos resiliente a ataques."], "correctAnswer": "B", "citation": "" },
+                    { "question": "Uma das desvantagens de usar um API Gateway é:", "options": ["A) Simplifica a lógica no frontend.", "B) Pode levar à duplicação de código.", "C) Pode aumentar a complexidade no cliente.", "D) Pode aumentar a complexidade e latência no Gateway."], "correctAnswer": "D", "citation": "" },
+                    { "question": "Qual das seguintes tecnologias é um padrão de mercado para API Gateway com foco em Service Mesh?", "options": ["A) Kong.", "B) NGINX.", "C) Envoy.", "D) AWS API Gateway."], "correctAnswer": "C", "citation": "" },
+                    { "question": "Por que é importante configurar 'timeouts' e 'circuit breakers' em um API Gateway?", "options": ["A) Para aumentar a latência das requisições.", "B) Para sobrecarregar os serviços de backend.", "C) Para evitar falhas em cascata e melhorar a resiliência do sistema.", "D) Para desativar o monitoramento de erros."], "correctAnswer": "C", "citation": "" },
+                    { "question": "O padrão 'Circuit Breaker' se move para o estado 'Meia-abertura' quando:", "options": ["A) Muitas falhas são detectadas.", "B) Após um tempo, permite algumas chamadas de teste.", "C) As chamadas fluem normalmente.", "D) O serviço de backend está completamente inoperante."], "correctAnswer": "B", "citation": "" },
+                    { "question": "Qual o principal benefício do 'Circuit Breaker' em sistemas distribuídos?", "options": ["A) Aumenta o tempo de inatividade.", "B) Previne falhas em cascata.", "C) Reduz a resiliência do sistema.", "D) Exige gerenciamento manual de cada falha."], "correctAnswer": "B", "citation": "" },
+                    { "question": "Qual das tecnologias mencionadas implementa o padrão 'Circuit Breaker'?", "options": ["A) Microsoft Excel.", "B) Hystrix.", "C) SQL Server.", "D) Photoshop."], "correctAnswer": "B", "citation": "" },
+                    { "question": "No exemplo de API Gateway com NGINX e Microservices, qual o papel do NGINX?", "options": ["A) Um banco de dados.", "B) Um servidor web e proxy reverso para rotear requisições.", "C) Um microserviço.", "D) Uma ferramenta de monitoramento."], "correctAnswer": "B", "citation": "" },
+                    { "question": "Como o BFF (Backend for Frontend) contribui para a 'personalização'?", "options": ["A) Limita a interface a um único tipo de cliente.", "B) Adapta a estrutura de dados e endpoints às necessidades de cada cliente.", "C) Remove a lógica do frontend.", "D) Padroniza todas as respostas de API para serem idênticas."], "correctAnswer": "B", "citation": "" },
+                    { "question": "Qual o desafio principal que o API Gateway resolve ao evitar a 'exposição direta dos serviços internos'?", "options": ["A) Torna os serviços internos mais complexos.", "B) Aumenta a segurança e reduz a superfície de ataque ao esconder a topologia interna.", "C) Facilita o acesso não autorizado aos serviços.", "D) Diminui a performance da aplicação."], "correctAnswer": "B", "citation": "" },
+                    { "question": "Um API Gateway permite a 'transformação de protocolo'. O que isso significa?", "options": ["A) Ele só aceita um tipo de protocolo, como HTTP.", "B) Ele pode converter chamadas de HTTP para HTTPS, por exemplo.", "C) Ele transforma dados em um novo formato de arquivo.", "D) Ele altera o idioma da comunicação."], "correctAnswer": "B", "citation": "" },
+                    { "question": "Qual é a principal vantagem do BFF (Backend for Frontend) em relação à 'redução de complexidade no cliente'?", "options": ["A) O BFF força o cliente a lidar com mais serviços.", "B) O BFF simplifica chamadas e lógica, entregando exatamente o que o cliente precisa, evitando overfetching/underfetching.", "C) O cliente precisa de mais lógica para interagir com o BFF.", "D) O BFF torna o cliente dependente do backend principal."], "correctAnswer": "B", "citation": "" },
+                    { "question": "Ao usar um API Gateway, o 'Service discovery' reduz a necessidade de:", "options": ["A) Autenticação.", "B) Roteamento de requisições.", "C) Configurações estáticas de IP/endereço dos serviços.", "D) Monitoramento de tráfego."], "correctAnswer": "C", "citation": "" },
+                    { "question": "Qual prática é recomendada para garantir a 'alta disponibilidade (HA)' de um API Gateway?", "options": ["A) Usar apenas um gateway.", "B) Minimizar a lógica complexa no Gateway.", "C) Mitigar com redundância e failover automático.", "D) Não monitorar métricas."], "correctAnswer": "C", "citation": "" },
+                    { "question": "Para que serve o 'Caching' em um API Gateway?", "options": ["A) Apenas para armazenar logs.", "B) Para aumentar a latência das requisições.", "C) Para armazenar respostas de requisições frequentes, melhorando a performance e reduzindo a carga nos serviços de backend.", "D) Para criptografar dados confidenciais."], "correctAnswer": "C", "citation": "" }
+                ],
+                "dificil": [
+                    {
+                        "question": "Discuta a principal desvantagem potencial de implementar 'API Composition' em um API Gateway.",
+                        "options": [
+                            "A) Reduz drasticamente o número de chamadas cliente → backend.",
+                            "B) Pode aumentar a complexidade e a latência no próprio Gateway.",
+                            "C) Simplifica a lógica no frontend, não havendo desvantagens.",
+                            "D) Elimina completamente a necessidade de comunicação entre microserviços."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "O padrão 'Circuit Breaker' se move para o estado 'Half-Open' quando:",
+                        "options": [
+                            "A) Falhas contínuas são detectadas e o circuito deve ser aberto.",
+                            "B) O serviço de backend está operando normalmente e as chamadas fluem livremente.",
+                            "C) Após um período de tempo, permite algumas chamadas de teste para verificar a recuperação do serviço.",
+                            "D) O contador de falhas excedeu o limite máximo e novas chamadas são rejeitadas."
+                        ],
+                        "correctAnswer": "C",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Como a centralização de 'Cross-cutting Concerns' em um API Gateway impacta a manutenibilidade e a padronização do desenvolvimento em uma arquitetura de microserviços?",
+                        "options": [
+                            "A) Aumenta a duplicação de código e dificulta a manutenção.",
+                            "B) Permite que cada microserviço implemente suas próprias versões, promovendo diversidade.",
+                            "C) Centraliza e padroniza esses aspectos, evitando duplicação de código e facilitando a manutenção e evolução.",
+                            "D) Torna a aplicação mais lenta devido ao processamento extra no gateway."
+                        ],
+                        "correctAnswer": "C",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Em que cenário específico a sobrecarga de latência introduzida por um API Gateway pode ser inaceitável?",
+                        "options": [
+                            "A) Em sistemas de processamento em segundo plano.",
+                            "B) Em aplicações de análise de dados offline.",
+                            "C) Em aplicações em tempo real, jogos online ou sistemas financeiros que exigem respostas imediatas.",
+                            "D) Em sistemas simples com poucos serviços."
+                        ],
+                        "correctAnswer": "C",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Aprofunde-se no padrão 'Backend for Frontend' (BFF), explicando como ele resolve problemas de 'overfetching' e 'underfetching'.",
+                        "options": [
+                            "A) O BFF ignora esses problemas, focando apenas na autenticação.",
+                            "B) O BFF agrega todos os dados disponíveis, aumentando o overfetching e underfetching.",
+                            "C) O BFF fornece uma interface otimizada para cada cliente, entregando exatamente o que é preciso, evitando buscar dados demais (overfetching) ou de menos (underfetching).",
+                            "D) Esses problemas são resolvidos no cliente, não no BFF."
+                        ],
+                        "correctAnswer": "C",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Como a implementação de 'Circuit Breakers' pode prevenir falhas em cascata em um sistema distribuído?",
+                        "options": [
+                            "A) Ao forçar todas as chamadas a passarem por um único ponto de falha.",
+                            "B) Ao monitorar chamadas a serviços externos e, em caso de falhas contínuas, interromper temporariamente novas tentativas, isolando o serviço problemático.",
+                            "C) Ao redirecionar automaticamente todas as chamadas para um serviço de backup, mesmo que o principal esteja funcionando.",
+                            "D) Ao aumentar a taxa de chamadas para um serviço com problemas, testando sua resiliência."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Qual a importância da 'observabilidade' (logs e métricas) no API Gateway para o diagnóstico e a resolução rápida de problemas em sistemas distribuídos?",
+                        "options": [
+                            "A) É irrelevante, pois o gateway se autogerencia.",
+                            "B) Permite centralizar o monitoramento do tráfego, identificar gargalos, erros e comportamentos inesperados, facilitando a depuração.",
+                            "C) Apenas aumenta o consumo de recursos sem benefício prático.",
+                            "D) Serve somente para registrar o número de requisições bem-sucedidas."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "A automação com 'Infrastructure as Code' (IaC) pode simplificar a configuração e o gerenciamento de um API Gateway complexo em um ambiente de produção porque:",
+                        "options": [
+                            "A) Exige que a configuração seja feita manualmente em cada servidor.",
+                            "B) Permite definir e provisionar a infraestrutura e a configuração do gateway de forma declarativa e versionada, reduzindo erros e facilitando a replicação.",
+                            "C) Elimina a necessidade de qualquer configuração para o gateway.",
+                            "D) Torna o processo de atualização mais lento e propenso a erros."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Como o API Gateway pode atuar como uma camada de 'cache' para melhorar a performance e reduzir a carga nos serviços de backend?",
+                        "options": [
+                            "A) Armazenando todas as requisições em um banco de dados temporário.",
+                            "B) Armazenando as respostas de requisições comuns para servi-las diretamente sem chamar os microserviços a cada vez.",
+                            "C) Criando novas requisições para o backend.",
+                            "D) Forçando o backend a recalcular as respostas a cada vez."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Qual o papel do API Gateway na 'exposição controlada de APIs externas e internas'?",
+                        "options": [
+                            "A) Expor todos os detalhes internos dos serviços diretamente ao público.",
+                            "B) Controlar quais APIs e funcionalidades são acessíveis a diferentes clientes e garantir a segurança, agindo como um proxy reverso.",
+                            "C) Bloquear todo o acesso externo ao sistema.",
+                            "D) Replicar APIs de terceiros sem modificação."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    { "question": "Em um sistema com múltiplos microserviços, como o API Gateway pode agregar respostas de diferentes serviços em uma única resposta para o cliente?", "options": ["A) Apenas passando a primeira resposta que recebe.", "B) Orquestrando chamadas a múltiplos serviços de backend e combinando suas respostas em uma única antes de enviar ao cliente.", "C) Enviando todas as respostas separadamente para o cliente e deixando que ele as combine.", "D) Impedindo que microserviços diferentes respondam à mesma requisição."], "correctAnswer": "B", "citation": "" },
+                    { "question": "Compare e contraste as funcionalidades do Kong e do NGINX + Lua como soluções para API Gateway.", "options": ["A) Ambos são exclusivos para Service Mesh e não funcionam como API Gateway.", "B) Kong é extensível via plugins e tem suporte nativo a configs declarativas, enquanto NGINX + Lua oferece alta performance com flexibilidade via scripts Lua para roteamento e manipulação de requisições.", "C) NGINX + Lua é uma solução serverless, enquanto Kong é uma solução baseada em contêineres.", "D) Kong é apenas um load balancer, e NGINX + Lua é apenas um proxy reverso."], "correctAnswer": "B", "citation": "" },
+                    { "question": "Qual é a principal função do 'Rate Limiting' em um API Gateway?", "options": ["A) Aumentar o número de requisições que um cliente pode fazer por segundo.", "B) Limitar o número de requisições que um cliente ou IP pode fazer em um determinado período para proteger os serviços contra sobrecarga e abusos.", "C) Priorizar requisições de baixa importância.", "D) Bloquear todas as requisições de um cliente específico."], "correctAnswer": "B", "citation": "" },
+                    { "question": "Por que o 'balanceamento de carga' e a 'redundância' são cruciais para garantir a 'alta disponibilidade' de um API Gateway?", "options": ["A) Porque o API Gateway não precisa de alta disponibilidade.", "B) O balanceamento distribui o tráfego entre múltiplas instâncias do gateway, e a redundância garante que, se uma instância falhar, outra possa assumir, evitando um ponto único de falha.", "C) Eles aumentam a latência do gateway, mas não sua disponibilidade.", "D) Apenas a redundância é importante, o balanceamento de carga é opcional."], "correctAnswer": "B", "citation": "" },
+                    { "question": "Como a 'transformação de protocolo' (ex: HTTP para HTTPS) realizada pelo API Gateway beneficia a comunicação do cliente e a segurança?", "options": ["A) Complica a comunicação, exigindo mais configurações do cliente.", "B) O cliente pode usar um protocolo simples (HTTP), e o gateway converte para um seguro (HTTPS) antes de enviar para o backend, adicionando uma camada de segurança e simplificando o cliente.", "C) Elimina a necessidade de criptografia.", "D) Permite apenas comunicação entre servidores."], "correctAnswer": "B", "citation": "" }
+                ]
+            },
+            "modelagemAnalise": {
+                "medio": [
+                    {
+                        "question": "Qual o propósito principal da modelagem de sistemas?",
+                        "options": [
+                            "A) Apenas documentar o código já existente.",
+                            "B) Representar e entender a estrutura e o comportamento de um sistema de software.",
+                            "C) Substituir completamente a escrita de código.",
+                            "D) Validar a funcionalidade da interface de usuário em tempo real."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": "" 
+                    },
+                    {
+                        "question": "Qual é a principal diferença entre escalabilidade horizontal e vertical?",
+                        "options": [
+                            "A) Escalabilidade horizontal adiciona CPU e RAM, enquanto a vertical adiciona mais máquinas.",
+                            "B) Escalabilidade horizontal adiciona mais máquinas, enquanto a vertical melhora os recursos de uma única máquina.",
+                            "C) Ambas adicionam mais máquinas, mas em diferentes localizações geográficas.",
+                            "D) A vertical é para bancos de dados, e a horizontal é para servidores de aplicação."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "O que significa 'Alta Disponibilidade' em arquitetura de sistemas confiáveis?",
+                        "options": [
+                            "A) A garantia de que o sistema sempre falhará sob carga intensa.",
+                            "B) A garantia de que o sistema permanece acessível e funcional mesmo sob carga intensa ou falhas.",
+                            "C) A capacidade de um sistema de ser utilizado por poucos usuários.",
+                            "D) A restrição a um único ponto de falha."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Defina 'Resiliência' em arquitetura de sistemas.",
+                        "options": [
+                            "A) A incapacidade de um sistema se recuperar de falhas.",
+                            "B) A capacidade de um sistema se recuperar de falhas e continuar operando de forma confiável.",
+                            "C) A dependência de um único servidor.",
+                            "D) A garantia de que o sistema nunca terá erros."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Qual a importância da 'Consistência' de dados em ambientes distribuídos?",
+                        "options": [
+                            "A) É irrelevante para a integridade dos dados.",
+                            "B) Garante que os dados e estados do sistema são mantidos corretamente, mesmo em ambientes distribuídos.",
+                            "C) Permite que os dados sejam diferentes em cada nó.",
+                            "D) Aumenta a complexidade sem benefício."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Descreva a arquitetura Cliente-Servidor.",
+                        "options": [
+                            "A) Todos os nós atuam como clientes e servidores.",
+                            "B) Clientes enviam requisições e servidores processam e respondem, centralizando o processamento e armazenamento.",
+                            "C) Divide o sistema em camadas concêntricas.",
+                            "D) Os componentes interagem por meio de eventos assíncronos."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Qual a principal característica da arquitetura em camadas?",
+                        "options": [
+                            "A) Eliminar a modularidade.",
+                            "B) Dividir o sistema em camadas (como apresentação, lógica de negócios e dados) para modularidade, escalabilidade e manutenibilidade.",
+                            "C) Focar na comunicação Peer-to-Peer.",
+                            "D) Centralizar todo o processamento em uma única camada."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "O que a 'Computação em Borda (Edge Computing)' visa reduzir?",
+                        "options": [
+                            "A) O número de servidores centrais.",
+                            "B) A latência e a carga sobre servidores centrais ou na nuvem, processando dados mais próximos da fonte.",
+                            "C) A complexidade do desenvolvimento de software.",
+                            "D) O tempo de execução de testes de integração."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Na arquitetura cliente-servidor multicamada, qual o papel da camada de apresentação?",
+                        "options": [
+                            "A) Processar dados do banco de dados.",
+                            "B) Gerenciar a lógica de negócios.",
+                            "C) Interagir com o cliente e exibir a interface do usuário.",
+                            "D) Realizar cálculos complexos."
+                        ],
+                        "correctAnswer": "C",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Qual o desafio da 'Escalabilidade' em arquiteturas de software modernas?",
+                        "options": [
+                            "A) Garantir que o sistema suporte um número decrescente de usuários.",
+                            "B) Garantir que o sistema suporte um número crescente de usuários e dados sem degradação de desempenho.",
+                            "C) Limitar o sistema a um único servidor.",
+                            "D) Apenas se preocupar com a escalabilidade vertical."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    { "question": "Para que serve o diagrama de atividade da UML?", "options": ["A) Modelar a estrutura estática do sistema.", "B) Descrever o fluxo de trabalho e processos.", "C) Representar a interação entre objetos no tempo.", "D) Listar os atores e casos de uso do sistema."], "correctAnswer": "B", "citation": "" },
+                    { "question": "No diagrama de caso de uso, o que representa o 'ator'?", "options": ["A) Uma classe interna do sistema.", "B) Uma interface de usuário.", "C) Um usuário ou sistema externo que interage com o sistema.", "D) Um banco de dados."], "correctAnswer": "C", "citation": "" },
+                    { "question": "Qual a finalidade do diagrama de sequência da UML?", "options": ["A) Modelar estados e transições de objetos.", "B) Descrever a ordem temporal das interações entre objetos ou componentes.", "C) Representar a hierarquia de classes.", "D) Mostrar o contexto externo do sistema."], "correctAnswer": "B", "citation": "" },
+                    { "question": "Qual das seguintes opções é uma utilização de modelos de arquiteturas?", "options": ["A) Como uma forma de complicar o trabalho da equipe de desenvolvimento.", "B) Apenas para fins de documentação pós-implementação.", "C) Como ponto de partida para o processo de projeto de arquitetura.", "D) Para substituir completamente a codificação."], "correctAnswer": "C", "citation": "" },
+                    { "question": "O que são 'Monitoramento e Observabilidade' em arquitetura de sistemas confiáveis?", "options": ["A) Ferramentas para esconder problemas.", "B) Ferramentas para identificar, diagnosticar e responder a problemas rapidamente.", "C) Apenas auditorias de segurança anuais.", "D) Processos de deploy manual."], "correctAnswer": "B", "citation": "" },
+                    { "question": "Qual o foco da Arquitetura Orientada a Serviços (SOA)?", "options": ["A) Estruturar o sistema como um monolito.", "B) Organizar funcionalidades em serviços reutilizáveis e interoperáveis.", "C) Utilizar apenas comunicação P2P.", "D) Processar dados próximos da fonte."], "correctAnswer": "B", "citation": "" },
+                    { "question": "A 'Arquitetura de Computação Serverless' permite a execução de código sem gerenciar servidores e:", "options": ["A) Exige gerenciamento manual de cada servidor.", "B) Escala automaticamente conforme a demanda.", "C) É limitada a um único provedor de nuvem.", "D) Não otimiza custos."], "correctAnswer": "B", "citation": "" },
+                    { "question": "O que o 'Diagrama de classe da UML' representa?", "options": ["A) Fluxo de atividades.", "B) Estados de um objeto.", "C) Classes e suas associações em um sistema.", "D) Interações de usuário."], "correctAnswer": "C", "citation": "" },
+                    { "question": "Qual dos seguintes é um desafio para a 'Latência e Performance' em aplicações modernas?", "options": ["A) Reduzir atrasos na comunicação e melhorar a resposta do sistema.", "B) Aumentar a complexidade do código.", "C) Diminuir a frequência de atualizações.", "D) Exigir mais recursos computacionais."], "correctAnswer": "A", "citation": "" },
+                    { "question": "Para a 'Manutenibilidade e Evolução do Código', uma solução é:", "options": ["A) Aumentar o acoplamento.", "B) Ignorar testes automatizados.", "C) Arquitetura de microsserviços, boas práticas de DevOps e CI/CD.", "D) Evitar a modularidade do código."], "correctAnswer": "C", "citation": "" },
+                    { "question": "O 'Diagrama de estado da UML' é usado para:", "options": ["A) Descrever interações entre objetos.", "B) Modelar o comportamento de um objeto em termos de seus estados e transições.", "C) Definir a estrutura de um banco de dados.", "D) Apresentar o contexto do sistema."], "correctAnswer": "B", "citation": "" },
+                    { "question": "A 'Arquitetura de Microsserviços' estrutura o sistema como:", "options": ["A) Um único bloco monolítico.", "B) Um conjunto de pequenos serviços independentes que se comunicam via APIs.", "C) Um sistema sem comunicação entre partes.", "D) Uma aplicação cliente-servidor de duas camadas."], "correctAnswer": "B", "citation": "" },
+                    { "question": "Em sistemas que lidam com dados sensíveis, a 'Segurança e Privacidade' exige:", "options": ["A) Apenas criptografia de dados.", "B) Criptografia de dados, autenticação multifator, controle de acesso baseado em roles (RBAC) e auditoria contínua.", "C) Ignorar acessos não autorizados.", "D) Apenas proteção contra ataques externos."], "correctAnswer": "B", "citation": "" },
+                    { "question": "Qual é um dos 'Modelos de Contexto' na modelagem de sistemas?", "options": ["A) Diagrama de Classe da UML.", "B) Diagrama de Atividade da UML.", "C) Diagrama de Estado da UML.", "D) Diagrama de Componentes."], "correctAnswer": "B", "citation": "" },
+                    { "question": "A 'Automação' em arquitetura de sistemas confiáveis refere-se a:", "options": ["A) Processos manuais de deploy.", "B) Processos automatizados para deploys, recuperação de falhas e gerenciamento eficiente do sistema.", "C) Eliminar a intervenção humana em todas as tarefas.", "D) Apenas o uso de ferramentas de linha de comando."], "correctAnswer": "B", "citation": "" }
+                ]
+            },
+            "arquiteturasModernas": {
+                "medio": [
+                    {
+                        "question": "Qual o principal objetivo no design de software em relação a acoplamento e coesão?",
+                        "options": [
+                            "A) Buscar alto acoplamento e alta coesão.",
+                            "B) Buscar baixo acoplamento e baixa coesão.",
+                            "C) Buscar alto acoplamento e baixa coesão.",
+                            "D) Buscar baixo acoplamento e alta coesão."
+                        ],
+                        "correctAnswer": "D",
+                        "citation": ""
+                    },
+                    {
+                        "question": "O padrão de projeto 'Strategy' (Estratégia) é usado para:",
+                        "options": [
+                            "A) Notificar automaticamente outros objetos sobre mudanças.",
+                            "B) Esconder a complexidade da criação de objetos.",
+                            "C) Adicionar novas funcionalidades a um objeto existente sem alterar sua classe original.",
+                            "D) Definir várias formas de fazer a mesma coisa e escolher qual usar em tempo real."
+                        ],
+                        "correctAnswer": "D",
+                        "citation": ""
+                    },
+                    {
+                        "question": "O que é 'alta coesão'?",
+                        "options": [
+                            "A) Um módulo faz muitas coisas não relacionadas.",
+                            "B) Um módulo faz uma única coisa bem feita.",
+                            "C) Módulos são muito ligados.",
+                            "D) Módulos são independentes."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Qual o outro nome da Arquitetura Hexagonal?",
+                        "options": [
+                            "A) Monolitic Architecture.",
+                            "B) Layered Architecture.",
+                            "C) Ports and Adapters Architecture.",
+                            "D) Event-Driven Architecture."
+                        ],
+                        "correctAnswer": "C",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Como a Arquitetura Hexagonal facilita a testabilidade?",
+                        "options": [
+                            "A) Misturando a lógica de negócio com a infraestrutura.",
+                            "B) Exigindo um banco de dados real para todos os testes.",
+                            "C) Isolando o domínio, permitindo testar a lógica de negócio de forma rápida e eficiente sem infraestrutura real.",
+                            "D) Tornando os testes lentos e frágeis."
+                        ],
+                        "correctAnswer": "C",
+                        "citation": ""
+                    },
+                    {
+                        "question": "O que é o 'Core da Aplicação' na Arquitetura Hexagonal?",
+                        "options": [
+                            "A) A camada de interface de usuário.",
+                            "B) O núcleo da aplicação, contendo a lógica de negócios pura e as regras essenciais, independente de tecnologias externas.",
+                            "C) O banco de dados principal.",
+                            "D) Os adaptadores de saída."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Defina 'Portas (Interfaces)' na Arquitetura Hexagonal.",
+                        "options": [
+                            "A) Implementações concretas de tecnologias externas.",
+                            "B) Contratos (interfaces) definidos pelo domínio ou pela camada de aplicação que especificam como o domínio interage com o mundo exterior.",
+                            "C) Frameworks de infraestrutura.",
+                            "D) Bancos de dados NoSQL."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Por que a arquitetura é chamada de 'Hexagonal'?",
+                        "options": [
+                            "A) Porque ela sempre tem exatamente seis interfaces.",
+                            "B) É uma metáfora para a ideia de que a aplicação pode ter um número arbitrário de interfaces/portas e adaptadores.",
+                            "C) Para indicar que ela suporta apenas 6 tipos de tecnologias.",
+                            "D) Para simbolizar um formato físico do servidor."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Como o padrão 'Observer' lida com a atualização de partes do sistema?",
+                        "options": [
+                            "A) Exigindo que cada parte do sistema verifique manualmente as mudanças.",
+                            "B) Um objeto ('Assunto') avisa automaticamente outros objetos ('Observadores') quando algo muda nele, mantendo-os atualizados sem que um saiba os detalhes do outro.",
+                            "C) Desabilitando as atualizações para evitar erros.",
+                            "D) Usando um sistema de polling constante."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    {
+                        "question": "Em que tipo de sistema é ideal usar a Arquitetura Hexagonal?",
+                        "options": [
+                            "A) Sistemas com domínio simples e requisitos estáveis.",
+                            "B) Sistemas de Domínio Complexo: Onde a lógica de negócio é rica, crucial e precisa ser protegida de detalhes de infraestrutura.",
+                            "C) Aplicações de curta duração e baixa manutenibilidade.",
+                            "D) Projetos com baixa volatilidade de requisitos."
+                        ],
+                        "correctAnswer": "B",
+                        "citation": ""
+                    },
+                    { "question": "O que o padrão de projeto 'Factory' (Fábrica) permite fazer?", "options": ["A) Notificar automaticamente outros objetos.", "B) Uma classe que se encarrega de criar objetos para você.", "C) Adicionar novas funcionalidades a um objeto existente.", "D) Trocar comportamentos sem alterar o código principal."], "correctAnswer": "B", "citation": "" },
+                    { "question": "Qual dos seguintes é um princípio de Design de Software?", "options": ["A) TCP/IP.", "B) SOLID.", "C) REST.", "D) SQL."], "correctAnswer": "B", "citation": "" },
+                    { "question": "O que significa 'baixo acoplamento'?", "options": ["A) Módulos são muito ligados.", "B) Mudar um módulo pode quebrar outros.", "C) Módulos são independentes; mudar um não afeta outros.", "D) O código é difícil de gerenciar."], "correctAnswer": "C", "citation": "" },
+                    { "question": "Por que a 'baixa coesão' torna o código difícil de manter?", "options": ["A) Porque o módulo faz uma única coisa bem feita.", "B) Porque o módulo faz muitas coisas não relacionadas, tornando-o confuso.", "C) Porque facilita a manutenção e o reuso.", "D) Porque o código é claro e fácil de entender."], "correctAnswer": "B", "citation": "" },
+                    { "question": "Para que serve o padrão 'Factory' em relação à criação de objetos?", "options": ["A) Para expor toda a complexidade da criação de objetos.", "B) Para esconder a complexidade da criação de objetos, facilitando a adição de novos tipos.", "C) Para impedir a criação de novos tipos de objetos.", "D) Para criar apenas objetos com herança complexa."], "correctAnswer": "B", "citation": "" },
+                    { "question": "O que o padrão de projeto 'Decorator' (Decorador) permite fazer?", "options": ["A) Alterar a classe original de um objeto para adicionar funcionalidades.", "B) Adicionar novas funcionalidades a um objeto existente, 'envolvendo-o' com um novo comportamento, sem alterar sua classe original.", "C) Trocar algoritmos em tempo real.", "D) Notificar objetos sobre mudanças de estado."], "correctAnswer": "B", "citation": "" },
+                    { "question": "Qual o principal problema que a Arquitetura Hexagonal busca resolver?", "options": ["A) A dificuldade de testar a interface de usuário.", "B) A lentidão do banco de dados.", "C) O acoplamento forte da lógica de negócio principal com preocupações externas (ex: bancos de dados, UIs).", "D) A falta de padrões de projeto."], "correctAnswer": "C", "citation": "" },
+                    { "question": "Qual o benefício da 'Flexibilidade' na Arquitetura Hexagonal?", "options": ["A) Torna o sistema rígido a novas tecnologias.", "B) Dificulta a troca de tecnologias externas.", "C) Permite facilmente trocar tecnologias externas (ex: banco de dados, APIs) sem reescrever a lógica de negócio central.", "D) Aumenta o acoplamento entre camadas."], "correctAnswer": "C", "citation": "" },
+                    { "question": "Qual a ideia central da Arquitetura Hexagonal em relação ao 'Core da Aplicação'?", "options": ["A) Deve se importar com todos os detalhes técnicos.", "B) Deve permanecer totalmente limpo e focado no negócio, sem se importar com os detalhes técnicos de como ele é usado ou interage com o exterior.", "C) Deve ser acoplado à infraestrutura.", "D) Deve ser uma única classe monolítica."], "correctAnswer": "B", "citation": "" },
+                    { "question": "Como a Arquitetura Hexagonal se integra com o Domain-Driven Design (DDD)?", "options": ["A) Elas são abordagens conflitantes.", "B) O 'core da aplicação' na Arquitetura Hexagonal é o 'domínio' do DDD, complementando-o perfeitamente.", "C) O DDD foca em infraestrutura, e a Arquitetura Hexagonal em domínio.", "D) O DDD é uma alternativa ao invés de uma sinergia."], "correctAnswer": "B", "citation": "" },
+                    { "question": "Qual princípio SOLID é o pilar da Arquitetura Hexagonal?", "options": ["A) Single Responsibility Principle (SRP).", "B) Open/Closed Principle (OCP).", "C) Liskov Substitution Principle (LSP).", "D) Dependency Inversion Principle (DIP)."], "correctAnswer": "D", "citation": "" },
+                    { "question": "Quando a Arquitetura Hexagonal é idealmente utilizada em 'Aplicações de Longa Duração'?", "options": ["A) Quando a manutenibilidade e a adaptabilidade a futuras mudanças de tecnologia são irrelevantes.", "B) Quando a manutenibilidade e a adaptabilidade a futuras mudanças de tecnologia são essenciais.", "C) Para projetos com requisitos fixos e imutáveis.", "D) Em sistemas que serão descartados rapidamente."], "correctAnswer": "B", "citation": "" },
+                    { "question": "A 'Clean Architecture' de Robert C. Martin defende a separação em camadas concêntricas onde as dependências apontam para:", "options": ["A) Apenas para fora.", "B) Apenas para dentro.", "C) Para qualquer direção.", "D) Para o domínio e a infraestrutura igualmente."], "correctAnswer": "B", "citation": "" },
+                    { "question": "Qual o propósito dos 'Casos de Uso (Use Cases)' na Arquitetura Hexagonal?", "options": ["A) Representar regras de negócio puras e centrais.", "B) Orquestrar entidades para cumprir um objetivo de negócio através de uma porta de entrada (input port).", "C) Implementar tecnologias externas.", "D) Conectar o domínio a um banco de dados específico."], "correctAnswer": "B", "citation": "" },
+                    { "question": "Para a Arquitetura Hexagonal, equipes 'maduras em Design de Software' são importantes porque já possuem familiaridade com:", "options": ["A) Apenas frameworks de frontend.", "B) DDD, SOLID e testes automatizados.", "C) Somente linguagens de programação específicas.", "D) Metodologias ágeis sem foco em design."], "correctAnswer": "B", "citation": "" }
+                ]
+            }
+        };
+        /* --- JavaScript questions data end here --- */
+
+        /* --- JavaScript quiz logic start here --- */
+        document.addEventListener('DOMContentLoaded', () => {
+            const quizSelectionScreen = document.getElementById('quiz-selection');
+            const themeSelect = document.getElementById('theme-select');
+            const levelSelect = document.getElementById('level-select');
+            const startQuizBtn = document.getElementById('start-quiz');
+            const selectionError = document.getElementById('selection-error');
+
+            const quizScreen = document.getElementById('quiz-screen');
+            const currentThemeDisplay = document.getElementById('current-theme');
+            const questionCounter = document.getElementById('question-counter');
+            const currentQuestionNumber = document.getElementById('current-question-number');
+            const totalQuestionsDisplay = document.getElementById('total-questions');
+            const questionText = document.getElementById('question-text');
+            const optionsContainer = document.getElementById('options-container');
+            const submitAnswerBtn = document.getElementById('submit-answer');
+            const nextQuestionBtn = document.getElementById('next-question');
+            const feedbackMessage = document.getElementById('feedback-message');
+            const citationDisplay = document.getElementById('citation-display');
+            const citationText = document.getElementById('citation-text');
+
+            const resultsScreen = document.getElementById('results-screen');
+            const scoreDisplay = document.getElementById('score');
+            const totalQuizQuestionsDisplay = document.getElementById('total-quiz-questions');
+            const restartQuizBtn = document.getElementById('restart-quiz');
+
+            let currentQuestions = [];
+            let currentQuestionIndex = 0;
+            let score = 0;
+            let selectedOption = null;
+
+            // --- Funções de UI ---
+            function showScreen(screenId) {
+                document.querySelectorAll('.screen').forEach(screen => {
+                    screen.classList.add('hidden');
+                });
+                document.getElementById(screenId).classList.remove('hidden');
+            }
+
+            function resetQuizUI() {
+                optionsContainer.innerHTML = '';
+                feedbackMessage.classList.add('hidden');
+                feedbackMessage.textContent = '';
+                submitAnswerBtn.classList.remove('hidden');
+                nextQuestionBtn.classList.add('hidden');
+                citationDisplay.classList.add('hidden');
+                citationText.textContent = ''; // Clear citation text
+                selectedOption = null;
+            }
+
+            function loadQuestion() {
+                resetQuizUI();
+                const questionData = currentQuestions[currentQuestionIndex];
+                if (!questionData) {
+                    showResults();
+                    return;
+                }
+
+                // Check if the selected theme/level has questions (this check is redundant here, but good for safety)
+                if (currentQuestions.length === 0) {
+                     selectionError.textContent = 'Não há questões disponíveis para esta seleção.';
+                     showScreen('quiz-selection'); // Go back to selection
+                     return;
+                }
+
+                currentThemeDisplay.textContent = `${themeSelect.options[themeSelect.selectedIndex].text} - Nível ${levelSelect.options[levelSelect.selectedIndex].text}`;
+                currentQuestionNumber.textContent = currentQuestionIndex + 1;
+                totalQuestionsDisplay.textContent = currentQuestions.length;
+                questionText.textContent = questionData.question;
+                optionsContainer.innerHTML = '';
+
+                questionData.options.forEach((option, index) => {
+                    const button = document.createElement('button');
+                    button.classList.add('option-button');
+                    button.textContent = option;
+                    button.dataset.option = String.fromCharCode(65 + index); // A, B, C, D
+                    button.addEventListener('click', () => selectOption(button));
+                    optionsContainer.appendChild(button);
+                });
+            }
+
+            function selectOption(button) {
+                document.querySelectorAll('.option-button').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                button.classList.add('selected');
+                selectedOption = button.dataset.option;
+                selectionError.textContent = ''; // Clear any previous error
+                feedbackMessage.classList.add('hidden'); // Hide feedback if user changes selection
+            }
+
+            function showFeedback(isCorrect, correctAnswer) {
+                if (isCorrect) {
+                    feedbackMessage.textContent = 'Correto!';
+                    feedbackMessage.classList.remove('feedback-incorrect');
+                    feedbackMessage.classList.add('feedback-correct');
+                } else {
+                    feedbackMessage.textContent = `Incorreto. A resposta correta é ${correctAnswer}.`;
+                    feedbackMessage.classList.remove('feedback-correct');
+                    feedbackMessage.classList.add('feedback-incorrect');
+                }
+                feedbackMessage.classList.remove('hidden');
+            }
+
+            function markOptions(correctAnswerLetter) {
+                optionsContainer.querySelectorAll('.option-button').forEach(button => {
+                    if (button.dataset.option === correctAnswerLetter) {
+                        button.classList.add('correct');
+                    } else if (button.classList.contains('selected')) {
+                        button.classList.add('incorrect');
+                    }
+                    button.disabled = true; // Disable all options after submission
+                });
+            }
+
+            function showResults() {
+                scoreDisplay.textContent = score;
+                totalQuizQuestionsDisplay.textContent = currentQuestions.length;
+                showScreen('results-screen');
+            }
+
+            // --- Event Listeners ---
+            startQuizBtn.addEventListener('click', () => {
+                const theme = themeSelect.value;
+                const level = levelSelect.value;
+
+                if (!theme || !level) {
+                    selectionError.textContent = 'Por favor, selecione um tema e um nível.';
+                    return;
+                }
+
+                // Check if 'questions' object exists and has the selected theme/level
+                if (typeof questions !== 'undefined' && questions[theme] && questions[theme][level]) {
+                    currentQuestions = questions[theme][level];
+                    if (currentQuestions.length === 0) {
+                         selectionError.textContent = 'Não há questões disponíveis para esta seleção.';
+                         return;
+                    }
+                    currentQuestionIndex = 0;
+                    score = 0;
+                    showScreen('quiz-screen');
+                    loadQuestion();
+                } else {
+                    selectionError.textContent = 'Erro ao carregar questões. Verifique sua seleção.';
+                }
+            });
+
+            submitAnswerBtn.addEventListener('click', () => {
+                if (selectedOption === null) {
+                    feedbackMessage.textContent = 'Por favor, selecione uma opção.';
+                    feedbackMessage.classList.remove('hidden');
+                    feedbackMessage.classList.remove('feedback-correct', 'feedback-incorrect');
+                    return;
+                }
+
+                const questionData = currentQuestions[currentQuestionIndex];
+                const isCorrect = (selectedOption === questionData.correctAnswer);
+
+                if (isCorrect) {
+                    score++;
+                }
+
+                showFeedback(isCorrect, questionData.correctAnswer);
+                markOptions(questionData.correctAnswer);
+
+                // Show citation if available
+                if (questionData.citation) {
+                    citationText.textContent = questionData.citation;
+                    citationDisplay.classList.remove('hidden');
+                } else {
+                    citationDisplay.classList.add('hidden');
+                }
+
+                submitAnswerBtn.classList.add('hidden');
+                nextQuestionBtn.classList.remove('hidden');
+            });
+
+            nextQuestionBtn.addEventListener('click', () => {
+                currentQuestionIndex++;
+                loadQuestion();
+            });
+
+            restartQuizBtn.addEventListener('click', () => {
+                themeSelect.value = ''; // Reset dropdowns
+                levelSelect.value = '';
+                selectionError.textContent = '';
+                showScreen('quiz-selection');
+            });
+
+            // Initially show selection screen
+            showScreen('quiz-selection');
+        });
+        /* --- JavaScript quiz logic end here --- */
+    </script>
+</body>
+</html>
